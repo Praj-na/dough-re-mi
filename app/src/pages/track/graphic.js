@@ -9,7 +9,7 @@ import './game.css';
 const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
   // Dynamic character and message based on score
   const [character, setCharacter] = useState("snail");
-  const [text, setText] = useState("Good job!");
+  const [text, setText] = useState(" ");
 
   // Initial positions of the cars
   const initialCar1Position = 110;
@@ -23,8 +23,14 @@ const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
   // Update character and message based on `realtimeScore`
   useEffect(() => {
     let randomText = '';
-    
-    if (player1Score || player2Score > 30) {
+
+    // If either player's score is 0, show no message
+    if (player1Score === 0 || player2Score === 0) {
+      setCharacter("snail");
+      randomText = ""; // No text when score is 0
+    } 
+    // For scores greater than 30
+    else if (player1Score > 30 || player2Score > 30) {
       setCharacter("snail");
       const snailPhrases = [
         "Amazing!", 
@@ -32,7 +38,9 @@ const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
         "Singer of the year!"
       ];
       randomText = snailPhrases[Math.floor(Math.random() * snailPhrases.length)];
-    } else if (player1Score || player2Score > 20) {
+    } 
+    // For scores greater than 20 but less than 30
+    else if (player1Score > 20 || player2Score > 20) {
       setCharacter("snail");
       const snailPhrases = [
         "Amazing!", 
@@ -40,7 +48,9 @@ const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
         "Singer of the year!"
       ];
       randomText = snailPhrases[Math.floor(Math.random() * snailPhrases.length)];
-    } else {
+    } 
+    // For other cases, show fish and random message
+    else {
       setCharacter("fish");
       const fishPhrases = [
         "Are you even singing the right song?",
@@ -49,7 +59,7 @@ const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
       ];
       randomText = fishPhrases[Math.floor(Math.random() * fishPhrases.length)];
     }
-  
+
     setText(randomText);
   }, [player1Score, player2Score]);
 
@@ -80,4 +90,3 @@ const Graphic = ({ realtimeScore, player1Score, player2Score }) => {
 };
 
 export default Graphic;
-

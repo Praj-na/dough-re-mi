@@ -5,7 +5,7 @@ const Snail = () => {
   return (
     <div className="character-container">
       <img src={snailImage} alt="Snail" className="character-image" />
-      <div className="text-bubble">Good job!</div>
+      <div className="text-bubble"> </div>
     </div>
   );
 };
