@@ -1,8 +1,10 @@
-import { useEffect, useState, forwardRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import AudioPlayer from "./AudioPlayer";
 import LyricsDisplay from "./LyricsDisplay";
+// import './PlayerRecorder.css'; // Create this file for styling
 
-const Karaoke = forwardRef(({ isPlaying}, ref) => {
+const Karaoke = () => {
+    
     const [lyrics, setLyrics] = useState([]);
     const [currentTime, setCurrentTime] = useState(0);
 
@@ -11,7 +13,7 @@ const Karaoke = forwardRef(({ isPlaying}, ref) => {
         fetch("/songs/espresso/clip-lyrics-data.json")
             .then((res) => res.json())
             .then((data) => {
-                // console.log("Lyrics JSON loaded: ", data);
+                console.log("Lyrics JSON loaded: ", data);
                 setLyrics(data.lyrics);
             })
             .catch(error => console.error("Error loading lyrics: ", error));
@@ -19,10 +21,10 @@ const Karaoke = forwardRef(({ isPlaying}, ref) => {
 
     return (
         <div>
-            <AudioPlayer onTimeUpdate={setCurrentTime} isPlaying={isPlaying} />
+            <AudioPlayer onTimeUpdate={setCurrentTime} />
             <LyricsDisplay lyrics={lyrics} currentTime={currentTime} />
         </div>
     );
-});
+};
 
 export default Karaoke;
