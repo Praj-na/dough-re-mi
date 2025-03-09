@@ -1,4 +1,4 @@
-// PlayerRecorder.js
+// PlayerRecorder.js with countdown removed
 import React, { useState, useEffect, useRef } from 'react';
 import './PlayerRecorder.css'; // Create this file for styling
 import RealTimePitchFeedback from './RealTimePitchFeedback';
@@ -14,46 +14,20 @@ const PlayerRecorder = ({
   microphoneStream,
   autoStart = false
 }) => {
-  const [status, setStatus] = useState('ready'); // ready, countdown, recording, processing
-  const [countdown, setCountdown] = useState(3);
+  const [status, setStatus] = useState('ready'); // ready, recording, processing
   const [recordingTime, setRecordingTime] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
-  const countdownTimerRef = useRef(null);
   const recordingTimerRef = useRef(null);
   
-  // Start the countdown to recording
-  const startCountdown = async () => {
+  // Start recording immediately without countdown
+  const startRecording = async () => {
     try {
       // Use the provided microphoneStream if available, otherwise request a new one
       const stream = microphoneStream || await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Begin the countdown
-      setStatus('countdown');
-      setCountdown(3);
-      
-      countdownTimerRef.current = setInterval(() => {
-        setCountdown(prevCount => {
-          if (prevCount <= 1) {
-            clearInterval(countdownTimerRef.current);
-            startRecording(stream);
-            return 0;
-          }
-          return prevCount - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      setErrorMessage('Could not access microphone. Please check permissions.');
-      setStatus('ready');
-    }
-  };
-  
-  // Start recording
-  const startRecording = (stream) => {
-    try {
       // Create media recorder using the provided stream
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -102,7 +76,6 @@ const PlayerRecorder = ({
       
       // Don't stop the audio tracks - just pause the recorder
       // We'll keep the microphone stream active for the next player
-      // This fixes the issue with Player 2 getting stuck
     }
   };
   
@@ -114,19 +87,15 @@ const PlayerRecorder = ({
     const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
     
     try {
-      // Use scoreWithAudioUrl function (moved inside a useEffect or event handler)
+      // Use improved scoreWithAudioUrl function
       const calculatedScore = await scoreWithAudioUrl(audioBlob, originalVocalsUrl);
-      
-      // Use a score between 60-95 if the real scoring fails
-    //   const calculatedScore = Math.floor(Math.random() * 36) + 60;
-
       
       // Immediately proceed to the next player
       onScoreCalculated(calculatedScore);
     } catch (error) {
       console.error('Error calculating score:', error);
       // Fallback to random score
-      const fallbackScore = Math.floor(Math.random() * 36) + 60;
+      const fallbackScore = Math.floor(Math.random() * 21) + 70; // 70-90 range
       onScoreCalculated(fallbackScore);
     }
   };
@@ -134,10 +103,10 @@ const PlayerRecorder = ({
   // Auto-start recording if autoStart is true
   useEffect(() => {
     if (autoStart && microphoneStream) {
-      // Automatically start the countdown after a short delay
+      // Start recording immediately or with minimal delay
       const timer = setTimeout(() => {
-        startCountdown();
-      }, 1000);
+        startRecording();
+      }, 300); // Just a short delay instead of countdown
       
       return () => clearTimeout(timer);
     }
@@ -146,7 +115,6 @@ const PlayerRecorder = ({
   // Clean up timers on unmount
   useEffect(() => {
     return () => {
-      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
       if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
@@ -166,15 +134,9 @@ const PlayerRecorder = ({
       
       <div className="recording-section">
         {status === 'ready' && (
-          <button className="record-button" onClick={startCountdown}>
+          <button className="record-button" onClick={startRecording}>
             Start Recording
           </button>
-        )}
-        
-        {status === 'countdown' && (
-          <div className="countdown">
-            <span className="countdown-number">{countdown}</span>
-          </div>
         )}
         
         {status === 'recording' && (
