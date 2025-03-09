@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, use } from 'react';
  import PlayerRecorder from '../../PlayerRecorder';
  import "./game.css"
  import Karaoke from '../../components/Karaoke';
@@ -12,15 +12,15 @@ import React, { useState, useEffect, useRef } from 'react';
    const [songData, setSongData] = useState(null);
    const [isLoading, setIsLoading] = useState(true);
    const [currentAudio, setCurrentAudio] = useState(null);
-   // configuring mic input and karaoke display to be triggered by same event
-   const [isPlaying, setIsPlaying] = useState(0);
-   const recorderRef = useRef(null);
-   const karaokeRef = useRef(null);
    // Store microphone stream globally to reuse between players
    const [microphoneStream, setMicrophoneStream] = useState(null);
    const [realtimeScore, setRealtimeScore] = useState(0);
+   // trigger both karaoke display and mic input recording
+   const [isPlaying, setIsPlaying] = useState(0);
+  //  const recorderRef = useRef(null);
+  //  const karaokeRef = useRef(null);
  
- 
+
    const [player1Name, setPlayer1Name] = useState(localStorage.getItem('playerName1') || 'Player 1');
    const [player2Name, setPlayer2Name] = useState(localStorage.getItem('playerName2') || 'Player 2');
    
@@ -91,22 +91,6 @@ import React, { useState, useEffect, useRef } from 'react';
      return microphoneStream;
    };
  
-   // Trigger both karaoke display and mic recording
-   const handleStartKaraoke = () => {
-     setIsPlaying(true);
-
-     // TODO: figure out if we really need these ???
-    // Start microphone recording
-     if (recorderRef.current) {
-       recorderRef.current.startRecording();
-    }
-
-    // Start karaoke (audio + lyrics)
-     if (karaokeRef.current) {
-       karaokeRef.current.startKaraoke();
-    }
-  };
-
    // Play the current line's audio section
    const playCurrentLineAudio = () => {
      // Stop any currently playing audio
@@ -219,11 +203,6 @@ import React, { useState, useEffect, useRef } from 'react';
                Current Performance: {realtimeScore ? Math.round(realtimeScore) : '0'}
              </div>
              
-             <div className="start-karaoke">
-              <button onClick={handleStartKaraoke} disabled={isPlaying}>
-                Start Karaoke
-              </button>
-
              <PlayerRecorder
                key={`player-${currentPlayer}-line-${currentLineIndex}`}
                playerName={`Player ${currentPlayer}`}
@@ -235,11 +214,11 @@ import React, { useState, useEffect, useRef } from 'react';
                onScoreCalculated={handleScoreCalculated}
                onRealtimeScoreUpdate={handleRealtimeScoreUpdate}
                microphoneStream={microphoneStream}
-              //  autoStart={currentLineIndex > 0} // Auto-start for all lines except the first
-              autoStart={isPlaying} // Auto-start when Karaoke starts
+               autoStart={currentLineIndex > 0} // Auto-start for all lines except the first
              />
-             <Karaoke ref={karaokeRef} isPlaying={isPlaying} />
            </div>
+
+           <Karaoke />
  
          {gameState === 'results' && (
            <div className="results-screen">
@@ -267,8 +246,8 @@ import React, { useState, useEffect, useRef } from 'react';
              
            </div>
          )}
-        </div>
      </div>
+   
    );
  };
  

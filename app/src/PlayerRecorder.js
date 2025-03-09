@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import './PlayerRecorder.css'; // Create this file for styling
 import RealTimePitchFeedback from './RealTimePitchFeedback';
 import { scoreWithAudioUrl } from './pitchComparison'; // Import the scoring function
+import AudioPlayer from './components/AudioPlayer.js';
+import LyricsDisplay from './components/LyricsDisplay.js';
+// import Karaoke from './components/Karaoke.js';
 
 const PlayerRecorder = ({ 
   playerName, 
@@ -17,20 +20,38 @@ const PlayerRecorder = ({
   const [status, setStatus] = useState('ready'); // ready, recording, processing
   const [recordingTime, setRecordingTime] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
-  
+  const [lyrics, setLyrics] = useState([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordingTimerRef = useRef(null);
+  const audioRef = useRef(null);
   
-  useEffect(() => {
-    if (autoStart) {
-        startRecording();
-    }
-  }, [autoStart]);
 
+  // Show karaoke display and play audio
+  const startKaraoke = () => {
+    console.log("Starting karaoke!!!");
+
+    fetch("/songs/espresso/clip-lyrics-data.json")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Lyrics JSON loaded: ", data);
+        setLyrics(data.lyrics);
+    })
+    .catch(error => console.error("Error loading lyrics: ", error));
+  };
+
+  
   // Start recording directly
   const startRecording = async () => {
     try {
+
+      // Start karaoke
+      console.log("Recording started...");
+      startKaraoke();
+
       // Use the provided microphoneStream if available, otherwise request a new one
       const stream = microphoneStream || await navigator.mediaDevices.getUserMedia({ audio: true });
       
@@ -131,20 +152,27 @@ const PlayerRecorder = ({
   
   return (
     <div className="player-recorder">
-      {/* <div className="player-info"> */}
-        {/* <h3>{playerName}'s Turn</h3> */}
-      {/* </div> */}
+      {/* <div className="player-info">
+        <h3>{playerName}'s Turn</h3>
+      </div> */}
       
-      {/* <div className="lyrics-display"> */}
-        {/* <p className="lyrics-text">{lineText}</p> */}
-      {/* </div> */}
+      {/* <div className="lyrics-display">
+        <p className="lyrics-text">{lineText}</p>
+      </div> */}
       
       <div className="recording-section">
-        {/* {status === 'ready' && (
+        {status === 'ready' && (
           <button className="record-button" onClick={startRecording}>
-            Start Recording
+            Start Karaoke
           </button>
-        )} */}
+        )}
+
+        {isPlaying && (
+          <div>
+            <AudioPlayer onTimeUpdate={setCurrentTime} />
+            <LyricsDisplay lyrics={lyrics} currentTime={currentTime} />
+          </div>
+        )}
         
         {status === 'recording' && (
           <div className="recording-info">
