@@ -22,6 +22,12 @@ const PlayerRecorder = ({
   const audioChunksRef = useRef([]);
   const recordingTimerRef = useRef(null);
   
+  useEffect(() => {
+    if (autoStart) {
+        startRecording();
+    }
+  }, [autoStart]);
+
   // Start recording directly
   const startRecording = async () => {
     try {
@@ -124,20 +130,20 @@ const PlayerRecorder = ({
   
   return (
     <div className="player-recorder">
-      <div className="player-info">
-        <h3>{playerName}'s Turn</h3>
-      </div>
+      {/* <div className="player-info"> */}
+        {/* <h3>{playerName}'s Turn</h3> */}
+      {/* </div> */}
       
-      <div className="lyrics-display">
-        <p className="lyrics-text">{lineText}</p>
-      </div>
+      {/* <div className="lyrics-display"> */}
+        {/* <p className="lyrics-text">{lineText}</p> */}
+      {/* </div> */}
       
       <div className="recording-section">
-        {status === 'ready' && (
+        {/* {status === 'ready' && (
           <button className="record-button" onClick={startRecording}>
             Start Recording
           </button>
-        )}
+        )} */}
         
         {status === 'recording' && (
           <div className="recording-info">
